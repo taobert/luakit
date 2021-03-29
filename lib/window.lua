@@ -410,6 +410,7 @@ _M.methods = {
         name = name or "ok"
         local th = theme[name]
         w.ibar.input.fg = th.fg
+        w.ibar.input.bg = th.bg
         w.ibar.prompt.fg = th.fg
         w.ibar.layout.bg = th.bg
     end,
