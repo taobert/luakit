@@ -175,18 +175,23 @@ _M.methods = {
     end,
 
     -- Zoom functions
-    zoom_in = function (view, _, step)
+    zoom_in = function (view, w, step)
         step = step or settings.get_setting("window.zoom_step")
-        view.zoom_level = view.zoom_level + step
+        w:zoom_set(view.zoom_level + step)
     end,
 
-    zoom_out = function (view, _, step)
+    zoom_out = function (view, w, step)
         step = step or settings.get_setting("window.zoom_step")
-        view.zoom_level = math.max(0.01, view.zoom_level) - step
+        w:zoom_set(math.max(step, view.zoom_level - step))
     end,
 
-    zoom_set = function (view, _, level)
-        view.zoom_level = level or 1.0
+    zoom_set = function (view, w, level)
+        local js = [=[ docRect = document.documentElement.getBoundingClientRect()
+                       window.scrollY / Math.max(docRect.height - window.innerHeight, 1) ]=]
+        w.view:eval_js(js, { callback = function (ret)
+            view.zoom_level = level or 1.0
+            w:scroll{ypct = 100*ret}
+        end})
     end,
 
     -- History traversing functions
@@ -237,10 +242,11 @@ function _M.methods.scroll(view, w, new)
 
         -- Absolute percent movement
         elseif rawget(new, axis .. "pct") then
-            local dir = axis == "x" and "Width" or "Height"
+            local inner_dir = axis == "x" and "Width" or "Height"
+            local rect_dir = axis == "x" and "width" or "height"
             local js = string.format([=[
-                Math.max(window.document.documentElement.scroll%s - window.inner%s, 0)
-            ]=], dir, dir)
+                    Math.max(document.documentElement.getBoundingClientRect().%s - window.inner%s, 0)
+                ]=], rect_dir, inner_dir)
             w.view:eval_js(js, { callback = function (max)
                 s[axis] = math.ceil(max * (new[axis.."pct"]/100))
             end})
