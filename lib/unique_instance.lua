@@ -17,7 +17,6 @@ for _, k in ipairs({"window", "webview", "lousy", "globals"}) do
     assert(not package.loaded[k], "unique_instance should be loaded before all other modules!")
 end
 
-local lfs = require "lfs"
 local unique = luakit.unique
 
 --- Whether links from secondary luakit instances should open in a new
@@ -39,10 +38,11 @@ unique.new("org.luakit")
 if unique.is_running() then
     msg.verbose("a primary instance is already running")
     local pickle = require("lousy.pickle")
+    local lousy = { fs = require("lousy.fs") }
 
     local u = {}
     for i, uri in ipairs(uris) do
-        u[i] = lfs.attributes(uri) and ("file://"..os.abspath(uri):gsub(" ","%%20")) or uri
+        u[i] = lousy.fs.exists(uri) and ("file://"..os.abspath(uri):gsub(" ","%%20")) or uri
     end
 
     unique.send_message("open-uri-set " .. pickle.pickle(u))

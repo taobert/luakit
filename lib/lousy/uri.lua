@@ -5,9 +5,9 @@
 -- @module lousy.uri
 -- @copyright 2011 Mason Larobina <mason.larobina@gmail.com>
 
-local lfs = require "lfs"
 
 -- Get luakit environment
+local fs = require "lousy.fs"
 local util = require "lousy.util"
 local uri_encode = luakit.uri_encode
 local uri_decode = luakit.uri_decode
@@ -63,7 +63,7 @@ local opts_metatable = {
 -- @treturn boolean true if the string could be a URI, false otherwise.
 function _M.is_uri(s)
     local get_setting = require("settings").get_setting
-    if get_setting("window.check_filepath") and lfs.attributes(s:gsub("^file://", "")) then
+    if get_setting("window.check_filepath") and fs.exists(s:gsub("^file://", "")) then
         return true
     end
 
@@ -97,7 +97,7 @@ function _M.split(s)
     -- Avoid spliting JS and file URIs
     if s:find("^javascript:") then return {s} end
     local get_setting = require("settings").get_setting
-    if get_setting("window.check_filepath") and lfs.attributes(s:gsub("^file://", "")) then
+    if get_setting("window.check_filepath") and fs.exists(s:gsub("^file://", "")) then
         return {s}
     end
 

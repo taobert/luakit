@@ -97,7 +97,7 @@ end
 -- @tparam[opt] string file The file path from which to load the session state.
 _M.load = function (delete, file)
     if not file then file = _M.session_file end
-    if not os.exists(file) then return {} end
+    if not lousy.fs.exists(file) then return {} end
 
     -- Read file
     local fh = io.open(file, "rb")
@@ -215,7 +215,7 @@ window.add_signal("init", function (w)
         -- Hack: should add a luakit shutdown hook...
         local num_windows = #lousy.util.table.values(window.bywidget)
         -- Remove the recovery session on a successful exit
-        if num_windows == 0 and os.exists(_M.recovery_file) then
+        if num_windows == 0 and lousy.fs.exists(_M.recovery_file) then
             os.remove(_M.recovery_file)
         end
     end)

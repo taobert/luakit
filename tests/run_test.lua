@@ -15,8 +15,8 @@ local priv = require "tests.priv"
 local util = require "tests.util"
 test.init(shared_lib)
 
-local lfs = require "lfs"
-local lousy = { util = require "lousy.util" }
+local lousy = { util = require "lousy.util",
+                  fs = require "lousy.fs"}
 local orig_print = print
 
 local xvfb_display
@@ -130,9 +130,10 @@ local function spawn_luakit_instance(config, ...)
     -- luakit instance spawned this way
     local cache_dir = util.getenv("XDG_CACHE_HOME") or (util.getenv("HOME") .. "/")
     local gst_dir = cache_dir .. "/gstreamer-1.0"
-    if lfs.attributes(gst_dir, "mode") == "directory" then
-        os.execute("mkdir -p " .. env.XDG_CACHE_HOME .. "/gstreamer-1.0/")
-        os.execute("cp "..gst_dir.."/registry.x86_64.bin " .. env.XDG_CACHE_HOME .. "/gstreamer-1.0")
+    local temp_gst_dir = env.XDG_CACHE_HOME .. "/gstreamer-1.0/"
+    if lousy.fs.exists(gst_dir) then
+        lousy.fs.mkdir(temp_gst_dir)
+        os.execute("cp "..gst_dir.."/registry.x86_64.bin " .. temp_gst_dir)
     end
 
     -- Build env prefix
@@ -212,8 +213,8 @@ end
 -- Find a free server number
 -- Does have a race condition...
 for i=0,math.huge do
-    local flat_lock = lfs.attributes(("/tmp/.X%d-lock"):format(i))
-    local nest_lock = lfs.attributes(("/tmp/.X11-unix/X%d"):format(i))
+    local flat_lock = lousy.fs.exists(("/tmp/.X%d-lock"):format(i))
+    local nest_lock = lousy.fs.exists(("/tmp/.X11-unix/X%d"):format(i))
     if not (flat_lock or nest_lock) then
         xvfb_display = ":" .. tostring(i)
         break

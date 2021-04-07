@@ -17,7 +17,6 @@ local webview = require("webview")
 local window = require("window")
 local lousy = require("lousy")
 local util = require("lousy.util")
-local lfs = require("lfs")
 local new_mode = require("modes").new_mode
 local binds, modes = require("binds"), require("modes")
 local add_binds, add_cmds = modes.add_binds, modes.add_cmds
@@ -255,8 +254,7 @@ end
 
 --- Loads all userscripts from the <code>_M.dir</code>.
 local function load_all()
-    if not os.exists(_M.dir) then return end
-    for file in lfs.dir(_M.dir) do
+    for file in lousy.fs.ls(_M.dir) do
         if string.match(file, "%.user%.js$") then
             load_js(_M.dir .. "/" .. file)
         end
@@ -289,8 +287,8 @@ end
 -- @tparam string file The file path in which to save the userscript.
 -- @tparam string js The userscript contents.
 function _M.save(file, js)
-    if not os.exists(_M.dir) then
-        util.mkdir(_M.dir)
+    if not lousy.fs.exists(_M.dir) then
+        lousy.fs.mkdir(_M.dir)
     end
     local f = io.open(_M.dir .. "/" .. file, "w")
     f:write(js)

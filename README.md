@@ -15,7 +15,6 @@ find luakit behaves similarly out of the box.
 
  * GTK+ 3
  * Lua 5.1 or LuaJIT 2
- * lfs (lua file system)
  * webkit2gtk
  * sqlite3
  * gstreamer (for video playback)

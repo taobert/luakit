@@ -2,7 +2,8 @@
 -- luakit configuration file, more information at https://luakit.github.io/ --
 ------------------------------------------------------------------------------
 
-require "lfs"
+-- Load library of useful functions for luakit
+local lousy = require "lousy"
 
 -- Check for lua configuration files that will never be loaded because they are
 -- shadowed by builtin modules.
@@ -15,7 +16,7 @@ table.insert(package.loaders, 2, function (modname)
     local lf = luakit.config_dir .. "/" .. modname:gsub("%.","/") .. ".lua"
     if f == lf then
         msg.warn("Loading local version of '" .. modname .. "' module: " .. lf)
-    elseif lfs.attributes(lf) then
+    elseif lousy.fs.exists(lf) then
         msg.warn("Found local version " .. lf
             .. " for core module '" .. modname
             .. "', but it won't be used, unless you update 'package.path' accordingly.")
@@ -29,9 +30,6 @@ require "unique_instance"
 luakit.process_limit = 4
 -- Set the cookie storage location
 soup.cookies_storage = luakit.data_dir .. "/cookies.db"
-
--- Load library of useful functions for luakit
-local lousy = require "lousy"
 
 -- Load users theme
 -- ("$XDG_CONFIG_HOME/luakit/theme.lua" or "/etc/xdg/luakit/theme.lua")

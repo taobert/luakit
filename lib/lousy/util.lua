@@ -12,6 +12,8 @@
 local rstring = string
 local rtable = table
 local math = require "math"
+local lousy = { fs = require("lousy.fs") }
+
 
 local _M = {}
 
@@ -46,9 +48,12 @@ function _M.unescape(text)
 end
 
 --- Create a directory.
+-- `lousy.util.mkdir()` is deprecated in favour of `lousy.fs.mkdir()`.
 -- @tparam string dir The directory.
 -- @treturn number The status code returned by `mkdir`; 0 indicates success.
 function _M.mkdir(dir)
+    msg.warn("`lousy.util.mkdir()` is deprecated and will be removed in a future version!")
+    msg.warn("Please use `lousy.fs.mkdir()` instead.")
     return os.execute(rstring.format("mkdir -p %q",  dir))
 end
 
@@ -226,9 +231,12 @@ function table.filter_array(t, pred)
 end
 
 --- Check if a file exists and is readable.
+-- `os.exists()` is deprecated in favour of `lousy.fs.exists()`.
 -- @tparam string f The file path.
 -- @treturn boolean `true` if the file exists and is readable.
 function os.exists(f)
+    msg.warn("`os.exists()` is deprecated and will be removed in a future version!")
+    msg.warn("Please use `lousy.fs.exists()` instead.")
     assert(type(f) == "string", "invalid path")
     local fh = io.open(f)
     if fh then
@@ -319,7 +327,7 @@ end
 
 local function find_file(paths)
     for _, p in ipairs(paths) do
-        if os.exists(p) then return p end
+        if lousy.fs.exists(p) then return p end
     end
     return error(rstring.format("No such file at: \n\t%s\n", rtable.concat(paths, ",\n\t")))
 end

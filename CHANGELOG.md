@@ -5,6 +5,7 @@
 ### Added
 
 - Added command `:userscripts-reload` to reload lua scripts
+- Removed luafilesystem dependence (closing #429)
 
 ### Changed
 

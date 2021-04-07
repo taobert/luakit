@@ -5,15 +5,16 @@
 -- @copyright 2010 Mason Larobina <mason.larobina@gmail.com>
 
 return {
-    util   = require("lousy.util"),
     bind   = require("lousy.bind"),
-    mode   = require("lousy.mode"),
-    theme  = require("lousy.theme"),
-    signal = require("lousy.signal"),
-    widget = require("lousy.widget"),
-    uri    = require("lousy.uri"),
+    fs     = require("lousy.fs"),
     load   = require("lousy.load"),
+    mode   = require("lousy.mode"),
     pickle = require("lousy.pickle"),
+    signal = require("lousy.signal"),
+    theme  = require("lousy.theme"),
+    uri    = require("lousy.uri"),
+    util   = require("lousy.util"),
+    widget = require("lousy.widget"),
 }
 
 -- vim: et:sw=4:ts=8:sts=4:tw=80

@@ -4,6 +4,7 @@ local docgen_dir = "build-utils/"
 local config_path = "doc/docgen.ld"
 
 package.path = package.path .. ";" .. docgen_dir .. "?.lua"
+package.path = package.path .. ';./lib/?.lua;./lib/?/init.lua'
 
 local parse = require "docgen.parse"
 local gen = require "docgen.gen"

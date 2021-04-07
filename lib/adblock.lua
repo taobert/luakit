@@ -60,7 +60,6 @@ local webview   = require("webview")
 local window    = require("window")
 local lousy     = require("lousy")
 local util      = lousy.util
-local lfs       = require("lfs")
 local modes     = require("modes")
 local add_cmds  = modes.add_cmds
 
@@ -92,15 +91,10 @@ end
 -- Detect files to read rules from
 local function detect_files()
     -- Create adblock directory if it doesn't exist
-    local curdir = lfs.currentdir()
-    if not lfs.chdir(adblock_dir) then
-        lfs.mkdir(adblock_dir)
-    else
-        lfs.chdir(curdir)
-    end
+    lousy.fs.mkdir(adblock_dir)
 
     msg.verbose("searching for filter lists in %s", adblock_dir)
-    for filename in lfs.dir(adblock_dir) do
+    for filename in lousy.fs.ls(adblock_dir) do
         if string.find(filename, "%.txt$") then
             msg.verbose("found filter list: " .. filename)
             table.insert(filterfiles, filename)
@@ -262,7 +256,7 @@ end
 
 -- Parses an Adblock Plus compatible filter list
 local parse_abpfilterlist = function (filters_dir, filename, cache)
-    if os.exists(filters_dir .. filename) then
+    if lousy.fs.exists(filters_dir .. filename) then
         msg.verbose("loading filter list %s", filename)
     else
         msg.warn("error loading filter list (%s: no such file or directory)", filename)
@@ -371,7 +365,7 @@ end
 local function read_subscriptions(file)
     -- Find a subscriptions file
     if not file then file = subscriptions_file end
-    if not os.exists(file) then
+    if not lousy.fs.exists(file) then
         msg.info(string.format("subscriptions file '%s' doesn't exist", file))
         return
     end
@@ -379,7 +373,7 @@ local function read_subscriptions(file)
     -- Read lines into subscriptions data table
     for line in io.lines(file) do
         local title, uri, opts = unpack(util.string.split(line, "\t"))
-        if title ~= "" and os.exists(adblock_dir..title) then
+        if title ~= "" and lousy.fs.exists(adblock_dir..title) then
             add_list(uri, title, opts, false, false)
         end
     end

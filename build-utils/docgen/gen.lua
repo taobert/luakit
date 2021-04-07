@@ -1,5 +1,5 @@
-local lfs = require "lfs"
-local lousy = { util = require "lib.lousy.util" }
+local lousy = { util = require "lib.lousy.util",
+                  fs = require "lib.lousy.fs"}
 local markdown = require "lib.markdown"
 
 local index = {}
@@ -440,8 +440,7 @@ end
 local generate_documentation = function (docs, out_dir)
     -- Utility functions
     local mkdir = function (path)
-        if lfs.attributes(path, "mode") == "directory" then return end
-        assert(lfs.mkdir(path))
+        assert(lousy.fs.mkdir(path))
     end
     local write_file = function (path, html)
         local f = assert(io.open(path, "w"))

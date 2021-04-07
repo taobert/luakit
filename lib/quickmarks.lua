@@ -58,7 +58,7 @@ function _M.load(fd_name)
     if not qmarks then qmarks = {} end
 
     fd_name = fd_name or quickmarks_file
-    if not os.exists(fd_name) then return end
+    if not lousy.fs.exists(fd_name) then return end
 
     for line in io.lines(fd_name) do
         local token, uris = string.match(lousy.util.string.strip(line), "^(%w)%s+(.+)$")

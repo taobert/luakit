@@ -23,7 +23,6 @@ function T.test_luacheck ()
     }
     local ui_globals = {
         "sqlite3",
-        "lfs",
         "xdg",
         "timer",
         "download",

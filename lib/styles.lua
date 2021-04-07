@@ -42,7 +42,6 @@
 local window = require("window")
 local webview = require("webview")
 local lousy   = require("lousy")
-local lfs     = require("lfs")
 local editor  = require("editor")
 local binds, modes = require("binds"), require("modes")
 local new_mode = require("modes").new_mode
@@ -326,7 +325,7 @@ _M.load_file = function (path)
     end
     stylesheets[#stylesheets+1] = {
         parts = parts,
-        file = path,
+        file = string.match(path,'[^/]+$'), -- throw away directory
         enabled = db_get(path),
     }
 end
@@ -334,11 +333,7 @@ end
 --- Detect all files in the stylesheets directory and automatically load them.
 _M.detect_files = function ()
     -- Create styles directory if it doesn't exist
-    local cwd = lfs.currentdir()
-    if not lfs.chdir(styles_dir) then
-        lfs.mkdir(styles_dir)
-        lfs.chdir(styles_dir)
-    end
+    lousy.fs.mkdir(styles_dir)
 
     for _, stylesheet in ipairs(stylesheets or {}) do
         for _, part in ipairs(stylesheet.parts) do
@@ -352,16 +347,15 @@ _M.detect_files = function ()
     stylesheets = {}
 
     msg.verbose("searching for user stylesheets in %s", styles_dir)
-    for filename in lfs.dir(styles_dir) do
+    for filename in lousy.fs.ls(styles_dir) do
         if string.find(filename, ".css$") then
             msg.verbose("found user stylesheet: " .. filename)
-            _M.load_file(filename)
+            _M.load_file(styles_dir..filename)
         end
     end
     msg.info("found " .. #stylesheets .. " user stylesheet" .. (#stylesheets == 1 and "" or "s"))
 
     update_all_stylesheet_applications()
-    lfs.chdir(cwd)
 end
 
 --- Watch a stylesheet in the styles directory for changes and apply them immediately.
@@ -378,16 +372,8 @@ end
 --- Create and immediately edit a new style for the current uri.
 -- @tparam table w The window table for the window providing the uri.
 _M.new_style = function (w)
-    -- Create styles directory if it doesn't exist
-    local cwd = lfs.currentdir()
-    if not lfs.chdir(styles_dir) then
-        lfs.mkdir(styles_dir)
-        lfs.chdir(styles_dir)
-    end
-    local path = string.match(w.view.uri, "//([%w*%.]+)") .. ".css"
-    local exists = io.open(path, "r")
-    if exists then
-        exists:close()
+    local path = styles_dir..string.match(w.view.uri, "//([%w*%.]+)") .. ".css"
+    if lousy.fs.exists(path) then
         local guard = {0}
         _M.watch_styles(guard, path)
         editor.edit(path, 1, function() guard[1] = nil end)
@@ -402,7 +388,6 @@ _M.new_style = function (w)
             editor.edit(path, 2, function() guard[1] = nil end)
         end
     end
-    lfs.chdir(cwd)
 end
 
 --- Toggle the enabled status of a style by filename.

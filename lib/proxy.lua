@@ -93,7 +93,7 @@ end
 -- @tparam string fd_name Custom proxy storage or `nil` to use default.
 function _M.load(fd_name)
     fd_name = fd_name or proxies_file
-    if not os.exists(fd_name) then return end
+    if not lousy.fs.exists(fd_name) then return end
     local strip = lousy.util.string.strip
 
     for line in io.lines(fd_name) do

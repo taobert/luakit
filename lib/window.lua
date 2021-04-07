@@ -7,7 +7,6 @@
 -- @copyright 2017 Aidan Holm <aidanholm@gmail.com>
 -- @copyright 2012 Mason Larobina <mason.larobina@gmail.com>
 
-require "lfs"
 local lousy = require("lousy")
 local settings = require("settings")
 local theme = lousy.theme.get()
@@ -260,8 +259,8 @@ local init_funcs = {
     end,
 
     set_window_icon = function (w)
-        local path = (luakit.dev_paths and os.exists("./extras/luakit.png")) or
-            os.exists(luakit.install_paths.pixmap_dir .. "/luakit.png")
+        local path = (luakit.dev_paths and lousy.fs.exists("./extras/luakit.png")) or
+            lousy.fs.exists(luakit.install_paths.pixmap_dir .. "/luakit.png")
         if path then w.win.icon = path end
     end,
 
@@ -635,9 +634,8 @@ _M.methods = {
 
         -- Handle JS and file URI before splitting arg
         if arg:find("^javascript:") then return arg end
-        if settings.get_setting("window.check_filepath") then
-            local path = arg:gsub("^file://", "")
-            if lfs.attributes(path) then return "file://" .. path end
+        if settings.get_setting("window.check_filepath") and lousy.fs.exists(arg:gsub("^file://", "")) then
+            return arg
         end
 
         local args = lstring.split(arg)

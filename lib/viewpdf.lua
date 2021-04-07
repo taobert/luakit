@@ -7,20 +7,14 @@
 -- @copyright 2016 Aidan Holm <aidanholm@gmail.com>
 
 local downloads = require("downloads")
+local lousy = require("lousy")
 
 local _M = {}
 
 downloads.add_signal("download-location", function(_, filename, mime)
     if mime == "application/pdf" then
         local dir = luakit.cache_dir .. "/viewpdf/"
-
-        local mode = lfs.attributes(dir, "mode")
-        if mode == nil then
-            assert(lfs.mkdir(dir))
-        elseif mode ~= "directory" then
-            error("Cannot create directory " .. dir)
-        end
-
+        assert(lousy.fs.mkdir(dir))
         return dir .. filename
     end
 end)
