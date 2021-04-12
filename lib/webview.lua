@@ -187,13 +187,13 @@ _M.methods = {
 
     zoom_set = function (view, w, level)
         view.zoom_level = level or 1.0
-        
-        -- *****  DANGER  ***** 
+
+        -- *****  DANGER  *****
         -- When webkit zooms, the page scrolls back to the top. This is believed to be a bug (#767).
         -- For whatever reason, adding a style element to the page puts it back where it should be.
         -- This is (to the best of my knowledge) undocumented, and might break in the future.
         -- The alternative, more deterministic, workaround proposed by @nicopap would be to remember,
-        -- and then reset the scroll position, but this requires more code, 
+        -- and then reset the scroll position, but this requires more code,
         -- and still jumps around quite a bit on large pages, due to rounding errors,
         -- and the fact that `documentElement.scrollHeight` changes oddly with zoom level.
         view:eval_js([=[ document.documentElement.innerHTML += '<style id="LuakitZoomScrollTemp"> </style>';
@@ -250,10 +250,11 @@ function _M.methods.scroll(view, w, new)
         elseif rawget(new, axis .. "pct") then
             local dir = axis == "x" and "Width" or "Height"
             local js = string.format([=[
-                    Math.max(document.documentElement.getBoundingClientRect().%s - window.inner%s, 0)
-                ]=], dir:lower(), dir)
+                Math.max(window.document.documentElement.scroll%s - window.inner%s, 0)
+            ]=], dir, dir)
+
             w.view:eval_js(js, { callback = function (max)
-                s[axis] = max * (new[axis.."pct"]/100)
+                s[axis] = math.ceil(max * (new[axis.."pct"]/100))
             end})
         end
     end
