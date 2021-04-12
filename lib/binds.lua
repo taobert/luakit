@@ -61,11 +61,7 @@ local scroll_acc = 0
 
 -- Add binds to special mode "all" which adds its binds to all modes.
 modes.add_binds("all", {
-    { "<Escape>", "Return to `normal` mode.",
-        function (w)
-            if not w:is_mode("passthrough") then w:set_prompt(); w:set_mode() end
-            return not w:is_mode("passthrough")
-        end },
+    { "<Escape>", "Return to `normal` mode.", function (w) w:set_prompt(); w:set_mode() end },
     { "<Control-[>", "Return to `normal` mode.", function (w) w:set_mode() end },
     { "<Mouse2>", [[Open link under mouse cursor in new tab or navigate to the
         contents of `luakit.selection.primary`.]],
@@ -414,10 +410,6 @@ modes.add_binds("normal", {
 modes.add_binds("insert", {
     { "<Control-z>", "Enter `passthrough` mode, ignores all luakit keybindings.",
         function (w) w:set_mode("passthrough") end },
-})
-
-modes.add_binds("passthrough", {
-    { "<Escape>", "Return to `normal` mode.", function (w) w:set_prompt(); w:set_mode() end },
 })
 
 --- Readline bindings for the luakit input bar.
