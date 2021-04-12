@@ -177,21 +177,27 @@ _M.methods = {
     -- Zoom functions
     zoom_in = function (view, w, step)
         step = step or settings.get_setting("window.zoom_step")
-        w:zoom_set(view.zoom_level + step)
+        _M.methods.zoom_set(view, w, view.zoom_level + step)
     end,
 
     zoom_out = function (view, w, step)
         step = step or settings.get_setting("window.zoom_step")
-        w:zoom_set(math.max(step, view.zoom_level - step))
+        _M.methods.zoom_set(view, w, math.max(step, view.zoom_level - step))
     end,
 
     zoom_set = function (view, w, level)
-        local js = [=[ docRect = document.documentElement.getBoundingClientRect()
-                       window.scrollY / Math.max(docRect.height - window.innerHeight, 1) ]=]
-        w.view:eval_js(js, { callback = function (ret)
-            view.zoom_level = level or 1.0
-            w:scroll{ypct = 100*ret}
-        end})
+        view.zoom_level = level or 1.0
+        
+        -- *****  DANGER  ***** 
+        -- When webkit zooms, the page scrolls back to the top. This is believed to be a bug (#767).
+        -- For whatever reason, adding a style element to the page puts it back where it should be.
+        -- This is (to the best of my knowledge) undocumented, and might break in the future.
+        -- The alternative, more deterministic, workaround proposed by @nicopap would be to remember,
+        -- and then reset the scroll position, but this requires more code, 
+        -- and still jumps around quite a bit on large pages, due to rounding errors,
+        -- and the fact that `documentElement.scrollHeight` changes oddly with zoom level.
+        view:eval_js([=[ document.documentElement.innerHTML += '<style id="LuakitZoomScrollTemp"> </style>';
+                         ]=],{})
     end,
 
     -- History traversing functions
@@ -242,13 +248,12 @@ function _M.methods.scroll(view, w, new)
 
         -- Absolute percent movement
         elseif rawget(new, axis .. "pct") then
-            local inner_dir = axis == "x" and "Width" or "Height"
-            local rect_dir = axis == "x" and "width" or "height"
+            local dir = axis == "x" and "Width" or "Height"
             local js = string.format([=[
                     Math.max(document.documentElement.getBoundingClientRect().%s - window.inner%s, 0)
-                ]=], rect_dir, inner_dir)
+                ]=], dir:lower(), dir)
             w.view:eval_js(js, { callback = function (max)
-                s[axis] = math.ceil(max * (new[axis.."pct"]/100))
+                s[axis] = max * (new[axis.."pct"]/100)
             end})
         end
     end
