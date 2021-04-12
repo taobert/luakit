@@ -242,11 +242,10 @@ function _M.methods.scroll(view, w, new)
 
         -- Absolute percent movement
         elseif rawget(new, axis .. "pct") then
-            local inner_dir = axis == "x" and "Width" or "Height"
-            local rect_dir = axis == "x" and "width" or "height"
+            local dir = axis == "x" and "Width" or "Height"
             local js = string.format([=[
-                    Math.max(document.documentElement.getBoundingClientRect().%s - window.inner%s, 0)
-                ]=], rect_dir, inner_dir)
+                Math.max(document.documentElement.getBoundingClientRect().%s - window.inner%s, 0)
+            ]=], dir:lower(), dir)
             w.view:eval_js(js, { callback = function (max)
                 s[axis] = math.ceil(max * (new[axis.."pct"]/100))
             end})
