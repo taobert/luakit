@@ -605,6 +605,8 @@ show_tabgroup_content = function (w, tabgroup_name)
     if tabgroup_name then
         local rows = build_tabgroup_menu(w, tabgroup_name)
         w.menu:build(rows)
+        local active = current_webview_in_group(w, tabgroup_name)
+        repeat w.menu:move_down() until w.menu:get()._tab == active
         w.menu:update()
         local notify = _default_notify
         if number_of_tabgroups(w) > 1 then
@@ -619,6 +621,7 @@ end
 show_tabgroups = function (w)
     local rows = build_tabgroup_menu(w)
     w.menu:build(rows)
+    repeat w.menu:move_down() until w.menu:get()._group == w2groups[w].active
     w.menu:update()
     local notify = _default_notify ..", ".. "+: show tabs in selected group"
     w:notify(notify, false)
@@ -660,11 +663,17 @@ end
 new_mode("tabgroup-menu-new", {
     enter = function (w)
         local groupname = _get_next_tabgroup_name(w)
-        w:set_prompt("Enter name of new tabgroup > ")
-        w:set_input(groupname)
+        w:set_prompt("Enter name of new tabgroup")
+        w:set_input('>'..groupname)
+    end,
+
+    changed = function (w, text)
+        -- Auto-exit mode if user backspaces ">" in the input bar.
+        if not string.match(text, "^>") then w:set_mode('tabgroup-menu') end
     end,
 
     activate = function (w, name)
+        name = string.sub(name, 2)
         if not w2groups[w].groups[name] then
             create_tabgroup(w, name)
         else
@@ -682,14 +691,20 @@ new_mode("tabgroup-menu-rename", {
     enter = function (w)
         local row = w.menu:get()
         local groupname = row._group
-        w:set_prompt("Enter new name of tabgroup '"..groupname.."' > ")
-        w:set_input(groupname)
+        w:set_prompt("Enter new name of tabgroup '"..groupname.."'")
+        w:set_input('>'..groupname)
         _operation[w] = { op = 'rename', _group = groupname, }
+    end,
+
+    changed = function (w, text)
+        -- Auto-exit mode if user backspaces ">" in the input bar.
+        if not string.match(text, "^>") then w:set_mode('tabgroup-menu') end
     end,
 
     activate = function (w, new_name)
         local old_name = _operation[w]._group
-        if old_name ~= new_name then
+        new_name = string.sub(new_name, 2)
+        if old_name ~= new_name and not w2groups[w].groups[new_name] then
             w2groups[w].groups[new_name] = w2groups[w].groups[old_name]
             w2groups[w].groups[old_name] = nil
             if w2groups[w].active == old_name then
@@ -764,21 +779,13 @@ add_binds("tabgroup-menu-select",  lousy.util.table.join({
 
 new_mode("tabgroup-menu", {
     enter = function (w, tabgroup_name)
-        local rows = build_tabgroup_menu(w, tabgroup_name)
         _operation[w] = nil
-        w.menu:build(rows)
         w:set_input()
-        local notify = _default_notify
-        if tabgroup_name then
-            if number_of_tabgroups(w) > 1 then
-                notify = notify ..", ".."m: move selected tab to another tabgroup, -: show list of groups"
-            else
-                notify = notify ..", ".."-: show list of groups"
-            end
-        else
-            notify = notify ..", ".. "+: show tabs in selected group"
-        end
-        w:notify(notify, false)
+	if tabgroup_name then
+	    show_tabgroup_content(w, tabgroup_name)
+	else
+	    show_tabgroups(w)
+	end
     end,
 
     leave = function (w)
