@@ -13,6 +13,18 @@ local add_binds = modes.add_binds
 
 local _M = {}
 
+--- A series of regexps to iterate over, looking for the Next link
+-- @type string
+-- @readwrite
+_M.next_res = '^\\s*(下一页|下一章|下一张|下一篇|下页|后页)>?\\s*$,\\bnext\\b,'..
+              '^(>|›)$,^(>>|»|→|≫)$,^(>|›),(>|›)$,^(»|≫),(»|≫)$,\\bmore\\b,\\bnewer\\b'
+
+--- A series of regexps to iterate over, looking for the Prev link
+-- @type string
+-- @readwrite
+_M.prev_res = '^\\s*<?(上一页|上一章|上一张|上一篇|上页|前页)\\s*$,'..
+              '\\b(prev|previous)\\b,^(<|‹)$,^(<<|«|←|≪)$,^(<|‹),(<|‹)$,^(«|≪),(«|≪)$,\\bolder\\b'
+
 local go_next = [=[
 (function() {
     function click(e) {
@@ -32,8 +44,7 @@ local go_next = [=[
     else { // Search from the bottom of the page up for a next link.
         var els = Array.from(document.getElementsByTagName("a")).filter(
             elem => elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
-        var res = "^\\s*(下一页|下一章|下一张|下一篇|下页|后页)>?\\s*$,\\bnext\\b," +
-                  "^>$,^(>>|»|→|≫)$,^(>|»),(>|»)$,\\bmore\\b,\\bnewer\\b"
+        var res = ']=] .. _M.next_res .. [=['
         for (let r of res.split(",").map(r => new RegExp(r, "i"))) {
             var i = els.length;
             while ((e = els[--i])) {
@@ -66,8 +77,7 @@ local go_prev = [=[
     else {
         var els = Array.from(document.getElementsByTagName("a")).filter(
             elem => elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
-        var res = "^\\s*<?(上一页|上一章|上一张|上一篇|上页|前页)\\s*$," +
-                  "\\b(prev|previous)\\b,^<$,^(<<|«|←|≪)$,^(<|«),(<|«)$,\\bolder\\b"
+        var res = ']=] .. _M.prev_res .. [=['
         for (let r of res.split(",").map(r => new RegExp(r, "i"))) {
             var i = els.length;
             while ((e = els[--i])) {
