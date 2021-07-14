@@ -326,7 +326,7 @@ _M.load_file = function (path)
     stylesheets[#stylesheets+1] = {
         parts = parts,
         file = string.match(path,'[^/]+$'), -- throw away directory
-        enabled = db_get(path),
+        enabled = db_get(file),
     }
 end
 
