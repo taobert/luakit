@@ -323,9 +323,10 @@ _M.load_file = function (path)
             when = part.when
         })
     end
+    file = string.match(path,'[^/]+$') -- throw away directory
     stylesheets[#stylesheets+1] = {
         parts = parts,
-        file = string.match(path,'[^/]+$'), -- throw away directory
+        file = file,
         enabled = db_get(file),
     }
 end
